@@ -1,0 +1,22 @@
+{
+  "enabled": false,
+  "pixKey": "",
+  "pixHolder": "Ivanir Maria Prokoski",
+  "whatsapp": "5548991124702",
+  "priceCents": 500,
+  "totalNumbers": 500,
+  "drawRule": "Sorteio em 10/12/2026 ou antes, caso os 500 números sejam vendidos e os pagamentos confirmados.",
+  "reservationMinutes": 30,
+  "prizes": [
+    {
+      "place": "1º prêmio",
+      "name": "Combo Vitorino Grill (Individual)",
+      "description": "1 hambúrguer caramelizado + 1 batata P + 1 refri 200 ml"
+    },
+    {
+      "place": "2º prêmio",
+      "name": "Torta de limão 1 L",
+      "description": "Da AnaBe Doces"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+const encoder=new TextEncoder();
+export const SESSION_COOKIE='__Host-negao_admin';
+export async function hash(value:string){return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',encoder.encode(value)))).map(b=>b.toString(16).padStart(2,'0')).join('');}
+export async function equalSecret(a:string,b:string){const x=await hash(a),y=await hash(b);let difference=0;for(let i=0;i<x.length;i++)difference|=x.charCodeAt(i)^y.charCodeAt(i);return difference===0;}
+async function key(secret:string){return crypto.subtle.importKey('raw',encoder.encode(secret),{name:'HMAC',hash:'SHA-256'},false,['sign','verify']);}
+export async function makeSession(secret:string){const expires=Date.now()+8*3600000;const payload=`${expires}.${crypto.randomUUID()}`;const signature=Array.from(new Uint8Array(await crypto.subtle.sign('HMAC',await key(secret),encoder.encode(payload)))).map(b=>b.toString(16).padStart(2,'0')).join('');return `${payload}.${signature}`;}
+export async function authenticated(request:Request,secret:string|undefined){if(!secret)return false;const value=(request.headers.get('cookie')||'').split(';').map(x=>x.trim()).find(x=>x.startsWith(SESSION_COOKIE+'='))?.slice(SESSION_COOKIE.length+1);if(!value)return false;const [expires,nonce,signature,...extra]=value.split('.');if(extra.length||!nonce||!/^[a-f0-9]{64}$/.test(signature||'')||!Number.isFinite(Number(expires))||Number(expires)<=Date.now()||Number(expires)>Date.now()+8*3600000+60000)return false;return crypto.subtle.verify('HMAC',await key(secret),Uint8Array.from(signature.match(/../g)!,b=>parseInt(b,16)),encoder.encode(`${expires}.${nonce}`));}
+export function sameOrigin(request:Request){return request.headers.get('origin')===new URL(request.url).origin;}
+export function sessionCookie(value:string,maxAge=8*3600){return `${SESSION_COOKIE}=${value}; HttpOnly; Secure; SameSite=None; Partitioned; Path=/; Max-Age=${maxAge}`;}
